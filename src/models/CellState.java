@@ -1,5 +1,11 @@
 package models;
 
+
 public enum CellState {
-    // Estados posibles de una celda
+    EMPTY,
+    WALL,
+    START,
+    END,
+    VISITED, // Para los algoritmos que marcan celdas visitadas
+    PATH     // Para el camino de la solución
 }

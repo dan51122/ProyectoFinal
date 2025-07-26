@@ -1,6 +1,26 @@
-// Clases de datos y modelos lógicos
+
 package models;
 
 public class AlgorithmResult {
-    // Datos del resultado del algoritmo
+    private String algorithmName;
+    private int pathLength;
+    private long executionTime;
+
+    public AlgorithmResult(String algorithmName, int pathLength, long executionTime) {
+        this.algorithmName = algorithmName;
+        this.pathLength = pathLength;
+        this.executionTime = executionTime;
+    }
+
+    public String getAlgorithmName() {
+        return algorithmName;
+    }
+
+    public int getPathLength() {
+        return pathLength;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
 }
