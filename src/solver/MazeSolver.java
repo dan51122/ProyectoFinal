@@ -1,6 +1,10 @@
-// Interfaces de algoritmos de resolución
 package solver;
 
+import models.Cell;
+
+import java.util.List;
+
 public interface MazeSolver {
-    // Método para resolver el laberinto
+    String getName();
+    List<Cell> solve(Cell[][] maze, int startRow, int startCol, int endRow, int endCol);
 }
