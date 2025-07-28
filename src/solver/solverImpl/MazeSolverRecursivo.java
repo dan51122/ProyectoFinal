@@ -7,36 +7,44 @@ import solver.MazeSolver;
 import java.util.*;
 
 public class MazeSolverRecursivo implements MazeSolver {
-    private List<Cell> path = new ArrayList<>();
-    private int rows, cols;
-
     @Override
     public String getName() {
-        return "Recursivo (2 direcciones)";
+        return "Recursivo";
     }
 
     @Override
     public List<Cell> solve(Cell[][] maze, int startRow, int startCol, int endRow, int endCol) {
-        rows = maze.length;
-        cols = maze[0].length;
-        path.clear();
-        if (dfs(maze, startRow, startCol, endRow, endCol)) return path;
-        return new ArrayList<>();
+        List<Cell> path = new ArrayList<>();
+        boolean found = findPath(maze, startRow, startCol, endRow, endCol, path, new boolean[maze.length][maze[0].length]);
+        if (found) {
+            return path;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
-    private boolean dfs(Cell[][] maze, int r, int c, int endRow, int endCol) {
+    private boolean findPath(Cell[][] maze, int r, int c, int endRow, int endCol, List<Cell> path, boolean[][] visited) {
+        int rows = maze.length;
+        int cols = maze[0].length;
         if (r < 0 || c < 0 || r >= rows || c >= cols) return false;
-        if (maze[r][c].getState() == CellState.WALL || maze[r][c].getState() == CellState.VISITED) return false;
+        if (visited[r][c] || maze[r][c].getState() == CellState.WALL) return false;
 
-        maze[r][c].setState(CellState.VISITED);
         path.add(maze[r][c]);
+        visited[r][c] = true;
 
         if (r == endRow && c == endCol) return true;
 
-        if (dfs(maze, r, c + 1, endRow, endCol)) return true;
-        if (dfs(maze, r + 1, c, endRow, endCol)) return true;
+        int[] dr = {-1, 1, 0, 0};
+        int[] dc = {0, 0, -1, 1};
+        for (int d = 0; d < 4; d++) {
+            int nr = r + dr[d];
+            int nc = c + dc[d];
+            if (findPath(maze, nr, nc, endRow, endCol, path, visited)) {
+                return true;
+            }
+        }
 
-        path.remove(path.size() - 1);
+        path.remove(path.size() - 1); // backtrack
         return false;
     }
 }

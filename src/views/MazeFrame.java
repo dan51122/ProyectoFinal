@@ -49,9 +49,11 @@ public class MazeFrame extends JFrame {
         JButton setStartButton = new JButton("Set Start");
         JButton setEndButton = new JButton("Set End");
         JButton toggleWallButton = new JButton("Toggle Wall");
+        JButton eraseWallButton = new JButton("Borrar muro");
         topPanel.add(setStartButton);
         topPanel.add(setEndButton);
         topPanel.add(toggleWallButton);
+        topPanel.add(eraseWallButton);
         add(topPanel, BorderLayout.NORTH);
 
         mazePanel = new MazePanel(numRows, numCols);
@@ -96,6 +98,10 @@ public class MazeFrame extends JFrame {
 
         toggleWallButton.addActionListener(e -> {
             mazePanel.setInteractionMode(MazePanel.Interaction_Mode.TOGGLE_WALL);
+        });
+
+        eraseWallButton.addActionListener(e -> {
+            mazePanel.setInteractionMode(MazePanel.Interaction_Mode.BORRAR_WALL);
         });
 
         solveButton.addActionListener(e -> {
