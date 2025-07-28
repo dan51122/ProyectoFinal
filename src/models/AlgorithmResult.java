@@ -1,4 +1,3 @@
-
 package models;
 
 public class AlgorithmResult {
@@ -22,5 +21,12 @@ public class AlgorithmResult {
 
     public long getExecutionTime() {
         return executionTime;
+    }
+
+    @Override
+    public String toString() {
+        return "Algoritmo: " + algorithmName +
+               "\nLongitud del camino: " + pathLength +
+               "\nTiempo de ejecución: " + executionTime + " ms";
     }
 }

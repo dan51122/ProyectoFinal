@@ -1,14 +1,11 @@
 package views;
 
 import javax.swing.*;
-
-import models.Cell;
-import models.CellState;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
+import models.Cell;
+import models.CellState;
 
 public class MazePanel extends JPanel {
 
@@ -25,28 +22,21 @@ public class MazePanel extends JPanel {
     public MazePanel(int rows, int cols) {
         this.numRows = rows;
         this.numCols = cols;
-        setPreferredSize(new Dimension(cols * 30, rows * 30));
-        setBackground(Color.WHITE);
-
-        this.mazeData = new Cell[rows][cols];
+        mazeData = new Cell[rows][cols];
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 mazeData[r][c] = new Cell(r, c, CellState.EMPTY);
             }
         }
-
+        setPreferredSize(new Dimension(cols * 30, rows * 30));
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 int cellWidth = getWidth() / numCols;
                 int cellHeight = getHeight() / numRows;
-
-                int clickedCol = e.getX() / cellWidth;
-                int clickedRow = e.getY() / cellHeight;
-
-                if (clickedRow >= 0 && clickedRow < numRows && clickedCol >= 0 && clickedCol < numCols) {
-                    handleCellClick(clickedRow, clickedCol);
-                }
+                int col = e.getX() / cellWidth;
+                int row = e.getY() / cellHeight;
+                handleCellClick(row, col);
             }
         });
     }
@@ -54,72 +44,49 @@ public class MazePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         int cellWidth = getWidth() / numCols;
         int cellHeight = getHeight() / numRows;
-
         for (int r = 0; r < numRows; r++) {
             for (int c = 0; c < numCols; c++) {
-                int x = c * cellWidth;
-                int y = r * cellHeight;
-
-                Color cellColor;
-                CellState state = mazeData[r][c].getState();
-                switch (state) {
-                    case WALL:
-                        cellColor = Color.BLACK;
-                        break;
-                    case START:
-                        cellColor = Color.GREEN;
-                        break;
-                    case END:
-                        cellColor = Color.RED;
-                        break;
-                    case VISITED:
-                        cellColor = Color.LIGHT_GRAY;
-                        break;
-                    case PATH:
-                        cellColor = Color.BLUE;
-                        break;
-                    default:
-                        cellColor = Color.WHITE;
-                        break;
+                Cell cell = mazeData[r][c];
+                switch (cell.getState()) {
+                    case EMPTY: g.setColor(Color.WHITE); break;
+                    case WALL: g.setColor(Color.BLACK); break;
+                    case START: g.setColor(Color.GREEN); break;
+                    case END: g.setColor(Color.RED); break;
+                    case VISITED: g.setColor(Color.CYAN); break;
+                    case PATH: g.setColor(Color.YELLOW); break;
                 }
-                g.setColor(cellColor);
-                g.fillRect(x, y, cellWidth, cellHeight);
-
-                g.setColor(Color.BLACK);
-                g.drawRect(x, y, cellWidth, cellHeight);
+                g.fillRect(c * cellWidth, r * cellHeight, cellWidth, cellHeight);
+                g.setColor(Color.GRAY);
+                g.drawRect(c * cellWidth, r * cellHeight, cellWidth, cellHeight);
             }
         }
     }
 
     private void handleCellClick(int row, int col) {
-        Cell clickedCell = mazeData[row][col];
-
+        if (row < 0 || col < 0 || row >= numRows || col >= numCols) return;
+        Cell cell = mazeData[row][col];
         switch (currentMode) {
             case SET_START:
-
                 clearPreviousState(CellState.START);
-                clickedCell.setState(CellState.START);
+                cell.setState(CellState.START);
                 break;
             case SET_END:
                 clearPreviousState(CellState.END);
-                clickedCell.setState(CellState.END);
+                cell.setState(CellState.END);
                 break;
             case TOGGLE_WALL:
-                if (clickedCell.getState() == CellState.WALL) {
-                    clickedCell.setState(CellState.EMPTY);
-                } else if (clickedCell.getState() == CellState.EMPTY) {
-                    clickedCell.setState(CellState.WALL);
+                if (cell.getState() == CellState.WALL) {
+                    cell.setState(CellState.EMPTY);
+                } else if (cell.getState() == CellState.EMPTY) {
+                    cell.setState(CellState.WALL);
                 }
                 break;
-            case NONE:
             default:
-                System.out.println("Modo de interacción no seleccionado.");
                 break;
         }
-        currentMode = Interaction_Mode.NONE;
+        repaint();
     }
 
     private void clearPreviousState(CellState stateToClear) {
@@ -127,7 +94,6 @@ public class MazePanel extends JPanel {
             for (int c = 0; c < numCols; c++) {
                 if (mazeData[r][c].getState() == stateToClear) {
                     mazeData[r][c].setState(CellState.EMPTY);
-                    return;
                 }
             }
         }
@@ -146,18 +112,16 @@ public class MazePanel extends JPanel {
         repaint();
     }
 
-    public void drawPath(List<Cell> path) {
-        if (path == null)
-            return;
+    public Cell[][] getMazeData() {
+        return mazeData;
+    }
+
+    public void drawPath(java.util.List<Cell> path) {
         for (Cell cell : path) {
             if (cell.getState() != CellState.START && cell.getState() != CellState.END) {
                 cell.setState(CellState.PATH);
             }
         }
         repaint();
-    }
-
-    public Cell[][] getMazeData() {
-        return mazeData;
     }
 }

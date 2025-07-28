@@ -1,6 +1,10 @@
-// Punto de entrada principal
+import views.MazeFrame;
+
 public class MazeApp {
     public static void main(String[] args) {
-        // Aquí inicia la aplicación
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            MazeFrame frame = new MazeFrame(15, 20); // Puedes cambiar el tamaño del laberinto
+            frame.setVisible(true);
+        });
     }
 }
