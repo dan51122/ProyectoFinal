@@ -16,7 +16,7 @@ public class GraficaTiemposDialog extends JDialog {
         List<AlgorithmResult> results = dao.getAllResults();
 
         add(new BarChartPanel(results));
-        setSize(1920, 1080);
+        setSize(1600, 720);
         setLocationRelativeTo(parent);
     }
 
@@ -44,7 +44,7 @@ public class GraficaTiemposDialog extends JDialog {
             int barWidth = Math.max(availableWidth / numBars, 1);
             long maxTime = results.stream().mapToLong(AlgorithmResult::getExecutionTime).max().orElse(1);
 
-            g.drawLine(margin, height - margin, width - margin, height - margin); 
+            g.drawLine(margin, height - margin, width - margin, height - margin);
             g.drawLine(margin, margin, margin, height - margin);
 
             g.drawString("Algoritmo", width / 2 - 30, height - 20);
@@ -64,7 +64,7 @@ public class GraficaTiemposDialog extends JDialog {
                 g.setColor(Color.BLACK);
                 g.drawRect(x, y, barWidth, barHeight);
 
-                String label = r.getAlgorithmName();
+                String label = r.getAlgorithmName().replaceAll("\\s*\\(.*?\\)", "").trim();
                 int labelWidth = fm.stringWidth(label);
                 g.drawString(label, x + (barWidth - labelWidth) / 2, height - margin + 15);
 
@@ -73,6 +73,5 @@ public class GraficaTiemposDialog extends JDialog {
                 g.drawString(timeStr, x + (barWidth - timeWidth) / 2, y - 5);
             }
         }
-
     }
 }
