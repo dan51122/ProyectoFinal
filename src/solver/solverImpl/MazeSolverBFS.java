@@ -16,52 +16,87 @@ public class MazeSolverBFS implements MazeSolver {
     public List<Cell> solve(Cell[][] maze, int startRow, int startCol, int endRow, int endCol) {
         int rows = maze.length;
         int cols = maze[0].length;
+
+        if (startRow < 0 || startRow >= rows || startCol < 0 || startCol >= cols ||
+                endRow < 0 || endRow >= rows || endCol < 0 || endCol >= cols) {
+            System.err.println("Error: Coordenadas de inicio o fin fuera de los límites del laberinto.");
+            return Collections.emptyList();
+        }
+
+        if (maze[startRow][startCol].getState() == CellState.WALL ||
+                maze[endRow][endCol].getState() == CellState.WALL) {
+            System.err.println("Error: La celda de inicio o fin es una pared.");
+            return Collections.emptyList();
+        }
+
+        if (startRow == endRow && startCol == endCol) {
+            List<Cell> path = new ArrayList<>();
+            path.add(maze[startRow][startCol]);
+            return path;
+        }
+
+        boolean[][] visited = new boolean[rows][cols];
+        Cell[][] prev = new Cell[rows][cols];
         Queue<Cell> queue = new LinkedList<>();
-        Map<Cell, Cell> cameFrom = new HashMap<>();
-        List<Cell> path = new ArrayList<>();
 
-        Cell start = maze[startRow][startCol];
-        Cell end = maze[endRow][endCol];
+        Cell startCell = maze[startRow][startCol];
+        queue.add(startCell);
+        visited[startRow][startCol] = true;
 
-        queue.add(start);
+        boolean foundPath = false;
 
         while (!queue.isEmpty()) {
             Cell current = queue.poll();
-            if (current.getState() == CellState.WALL || current.getState() == CellState.VISITED) continue;
+            int r = current.getRow();
+            int c = current.getCol();
 
-            current.setState(CellState.VISITED);
-
-            if (current == end) {
-                while (current != null) {
-                    path.add(0, current);
-                    current = cameFrom.get(current);
-                }
-                return path;
+            if (r == endRow && c == endCol) {
+                foundPath = true;
+                break;
             }
 
             for (Cell neighbor : getNeighbors(maze, current)) {
-                if (!cameFrom.containsKey(neighbor)) {
+                int nr = neighbor.getRow();
+                int nc = neighbor.getCol();
+
+                if (!visited[nr][nc] && neighbor.getState() != CellState.WALL) {
                     queue.add(neighbor);
-                    cameFrom.put(neighbor, current);
+                    visited[nr][nc] = true;
+                    prev[nr][nc] = current;
                 }
             }
         }
 
+        List<Cell> path = new ArrayList<>();
+        if (foundPath) {
+            Cell curr = maze[endRow][endCol];
+            while (curr != null && !(curr.getRow() == startRow && curr.getCol() == startCol)) {
+                path.add(curr);
+                curr = prev[curr.getRow()][curr.getCol()];
+            }
+            if (curr != null) {
+                path.add(curr);
+            }
+            Collections.reverse(path);
+        }
         return path;
     }
 
     private List<Cell> getNeighbors(Cell[][] maze, Cell cell) {
-        List<Cell> neighbors = new ArrayList<>();
-        int r = cell.getRow();
-        int c = cell.getCol();
         int rows = maze.length;
         int cols = maze[0].length;
-
-        if (r > 0) neighbors.add(maze[r - 1][c]);
-        if (r < rows - 1) neighbors.add(maze[r + 1][c]);
-        if (c > 0) neighbors.add(maze[r][c - 1]);
-        if (c < cols - 1) neighbors.add(maze[r][c + 1]);
-
+        int r = cell.getRow();
+        int c = cell.getCol();
+        List<Cell> neighbors = new ArrayList<>();
+        int[] dr = {-1, 1, 0, 0};
+        int[] dc = {0, 0, -1, 1};
+        for (int d = 0; d < 4; d++) {
+            int nr = r + dr[d];
+            int nc = c + dc[d];
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                neighbors.add(maze[nr][nc]);
+            }
+        }
         return neighbors;
     }
 }

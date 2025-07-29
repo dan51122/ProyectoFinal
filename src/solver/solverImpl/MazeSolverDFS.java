@@ -1,10 +1,9 @@
 package solver.solverImpl;
 
+import java.util.*;
 import models.Cell;
 import models.CellState;
 import solver.MazeSolver;
-
-import java.util.*;
 
 public class MazeSolverDFS implements MazeSolver {
     @Override
@@ -16,52 +15,59 @@ public class MazeSolverDFS implements MazeSolver {
     public List<Cell> solve(Cell[][] maze, int startRow, int startCol, int endRow, int endCol) {
         int rows = maze.length;
         int cols = maze[0].length;
+        boolean[][] visited = new boolean[rows][cols];
+        Cell[][] prev = new Cell[rows][cols];
         Stack<Cell> stack = new Stack<>();
-        Map<Cell, Cell> cameFrom = new HashMap<>();
-        List<Cell> path = new ArrayList<>();
-
-        Cell start = maze[startRow][startCol];
-        Cell end = maze[endRow][endCol];
-
-        stack.push(start);
+        stack.push(maze[startRow][startCol]);
+        visited[startRow][startCol] = true;
 
         while (!stack.isEmpty()) {
             Cell current = stack.pop();
-            if (current.getState() == CellState.WALL || current.getState() == CellState.VISITED) continue;
+            int r = current.getRow();
+            int c = current.getCol();
 
-            current.setState(CellState.VISITED);
-
-            if (current == end) {
-                while (current != null) {
-                    path.add(0, current);
-                    current = cameFrom.get(current);
-                }
-                return path;
+            if (r == endRow && c == endCol) {
+                break;
             }
 
             for (Cell neighbor : getNeighbors(maze, current)) {
-                if (!cameFrom.containsKey(neighbor)) {
+                int nr = neighbor.getRow();
+                int nc = neighbor.getCol();
+                if (!visited[nr][nc] && neighbor.getState() != CellState.WALL) {
                     stack.push(neighbor);
-                    cameFrom.put(neighbor, current);
+                    visited[nr][nc] = true;
+                    prev[nr][nc] = current;
                 }
             }
         }
 
+        // Reconstruir el camino
+        List<Cell> path = new ArrayList<>();
+        Cell curr = maze[endRow][endCol];
+        while (curr != null && !(curr.getRow() == startRow && curr.getCol() == startCol)) {
+            path.add(curr);
+            curr = prev[curr.getRow()][curr.getCol()];
+        }
+        if (curr != null) path.add(curr); 
+        Collections.reverse(path);
         return path;
     }
 
     private List<Cell> getNeighbors(Cell[][] maze, Cell cell) {
-        List<Cell> neighbors = new ArrayList<>();
-        int r = cell.getRow();
-        int c = cell.getCol();
         int rows = maze.length;
         int cols = maze[0].length;
-
-        if (r > 0) neighbors.add(maze[r - 1][c]);
-        if (r < rows - 1) neighbors.add(maze[r + 1][c]);
-        if (c > 0) neighbors.add(maze[r][c - 1]);
-        if (c < cols - 1) neighbors.add(maze[r][c + 1]);
-
+        int r = cell.getRow();
+        int c = cell.getCol();
+        List<Cell> neighbors = new ArrayList<>();
+        int[] dr = {-1, 1, 0, 0};
+        int[] dc = {0, 0, -1, 1};
+        for (int d = 0; d < 4; d++) {
+            int nr = r + dr[d];
+            int nc = c + dc[d];
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                neighbors.add(maze[nr][nc]);
+            }
+        }
         return neighbors;
     }
 }
