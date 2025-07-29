@@ -16,7 +16,7 @@ public class GraficaTiemposDialog extends JDialog {
         List<AlgorithmResult> results = dao.getAllResults();
 
         add(new BarChartPanel(results));
-        setSize(600, 400);
+        setSize(1920, 1080);
         setLocationRelativeTo(parent);
     }
 
@@ -38,33 +38,41 @@ public class GraficaTiemposDialog extends JDialog {
             int width = getWidth();
             int height = getHeight();
             int margin = 60;
-            int barWidth = (width - 2 * margin) / results.size();
+            int barSpacing = 10;
+            int numBars = results.size();
+            int availableWidth = width - 2 * margin - (numBars - 1) * barSpacing;
+            int barWidth = Math.max(availableWidth / numBars, 1);
             long maxTime = results.stream().mapToLong(AlgorithmResult::getExecutionTime).max().orElse(1);
 
-            g.drawLine(margin, height - margin, width - margin, height - margin); // eje X
-            g.drawLine(margin, margin, margin, height - margin); // eje Y
+            g.drawLine(margin, height - margin, width - margin, height - margin); 
+            g.drawLine(margin, margin, margin, height - margin);
 
-            // Etiquetas de ejes
             g.drawString("Algoritmo", width / 2 - 30, height - 20);
             g.drawString("Tiempo (ms)", 10, margin - 10);
 
-            for (int i = 0; i < results.size(); i++) {
+            FontMetrics fm = g.getFontMetrics();
+
+            for (int i = 0; i < numBars; i++) {
                 AlgorithmResult r = results.get(i);
                 int barHeight = (int) ((r.getExecutionTime() * 1.0 / maxTime) * (height - 2 * margin - 20));
-                int x = margin + i * barWidth + 10;
+                int x = margin + i * (barWidth + barSpacing);
                 int y = height - margin - barHeight;
 
                 g.setColor(new Color(100, 150, 255));
-                g.fillRect(x, y, barWidth - 20, barHeight);
+                g.fillRect(x, y, barWidth, barHeight);
 
                 g.setColor(Color.BLACK);
-                g.drawRect(x, y, barWidth - 20, barHeight);
+                g.drawRect(x, y, barWidth, barHeight);
 
                 String label = r.getAlgorithmName();
-                g.drawString(label, x, height - margin + 15);
+                int labelWidth = fm.stringWidth(label);
+                g.drawString(label, x + (barWidth - labelWidth) / 2, height - margin + 15);
 
-                g.drawString(String.valueOf(r.getExecutionTime()), x, y - 5);
+                String timeStr = String.valueOf(r.getExecutionTime());
+                int timeWidth = fm.stringWidth(timeStr);
+                g.drawString(timeStr, x + (barWidth - timeWidth) / 2, y - 5);
             }
         }
+
     }
 }

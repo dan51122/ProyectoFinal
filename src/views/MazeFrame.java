@@ -47,12 +47,12 @@ public class MazeFrame extends JFrame {
         setLocationRelativeTo(null);
 
         mazePanel = new MazePanel(numRows, numCols);
-        this.controller = new MazeController(this, mazePanel); // Se crea el controlador aquí
+        this.controller = new MazeController(this, mazePanel); 
         initComponents(numRows, numCols);
     }
 
     private void initComponents(int numRows, int numCols) {
-        // --- Panel Superior (Botones de Interacción con el Laberinto) ---
+       
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         setStartButton = new JButton("Set Start");
         setEndButton = new JButton("Set End");
@@ -69,10 +69,10 @@ public class MazeFrame extends JFrame {
         topPanel.add(graficaButton);
         add(topPanel, BorderLayout.NORTH);
 
-        // --- Panel del Laberinto ---
+     
         add(new JScrollPane(mazePanel), BorderLayout.CENTER);
 
-        // --- Panel Inferior (Botones de Solución y Algoritmos) ---
+
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         bottomPanel.add(new JLabel("Algoritmo:"));
         String[] algorithms = { "Recursivo", "Recursivo Completo", "Recursivo Completo BT", "BFS", "DFS" };
@@ -95,24 +95,24 @@ public class MazeFrame extends JFrame {
         bottomPanel.add(stepStopButton);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // --- Barra de Menú ---
+       
         JMenuBar menuBar = new JMenuBar();
         JMenu archivoMenu = new JMenu("Archivo");
         JMenuItem salirItem = new JMenuItem("Salir");
-        salirItem.addActionListener(e -> System.exit(0)); // Esto puede quedarse aquí o pasarse al controlador si quieres manejar cierres más complejos.
+        salirItem.addActionListener(e -> System.exit(0)); 
         archivoMenu.add(salirItem);
 
         JMenu ayudaMenu = new JMenu("Ayuda");
         JMenuItem acercaDeItem = new JMenuItem("Acerca de...");
         acercaDeItem.addActionListener(e -> JOptionPane.showMessageDialog(this, "Creador de Laberintos v1.0",
-                "Acerca de", JOptionPane.INFORMATION_MESSAGE)); // Esto también puede quedarse aquí
+                "Acerca de", JOptionPane.INFORMATION_MESSAGE)); 
         ayudaMenu.add(acercaDeItem);
 
         menuBar.add(archivoMenu);
         menuBar.add(ayudaMenu);
         setJMenuBar(menuBar);
 
-        // --- Añadir Listeners (ahora delegan en el controlador) ---
+
         setStartButton.addActionListener(e -> {
             controller.setInteractionMode(MazePanel.Interaction_Mode.SET_START);
             setActiveButton(setStartButton, setEndButton, toggleWallButton, eraseWallButton);
@@ -160,12 +160,12 @@ public class MazeFrame extends JFrame {
         JOptionPane.showMessageDialog(this, message, title, messageType);
     }
 
-    // Método para dibujar el camino, llamado desde el controlador
+
     public void drawPathOnPanel(List<Cell> path) {
         mazePanel.drawPath(path);
     }
 
-    // Método para repintar el panel del laberinto
+
     public void repaintMazePanel() {
         mazePanel.repaint();
     }

@@ -40,7 +40,7 @@ public class ResultadosDialog extends JDialog {
         add(scrollPane, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        setSize(400, 300);
+        setSize(480, 360);
         setLocationRelativeTo(parent);
     }
 }
