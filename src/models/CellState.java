@@ -6,6 +6,6 @@ public enum CellState {
     WALL,
     START,
     END,
-    VISITED, // Para los algoritmos que marcan celdas visitadas
-    PATH     // Para el camino de la solución
+    VISITED, 
+    PATH     
 }

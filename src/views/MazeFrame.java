@@ -167,7 +167,7 @@ public class MazeFrame extends JFrame {
                 result = new AlgorithmResult(solver.getName(), path.size(), durationMs);
                 JOptionPane.showMessageDialog(this, result.toString(), "Resultado", JOptionPane.INFORMATION_MESSAGE);
             }
-            // Guarda el resultado en el CSV
+  
             AlgorithmResultDAO dao = new AlgorithmResultDAOFile();
             dao.saveResult(result);
         });

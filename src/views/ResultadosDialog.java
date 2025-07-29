@@ -1,27 +1,46 @@
-
 package views;
 
+import dao.AlgorithmResultDAO;
+import dao.daoImpl.AlgorithmResultDAOFile;
+import models.AlgorithmResult;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class ResultadosDialog extends JDialog {
+    public ResultadosDialog(JFrame parent) {
+        super(parent, "Resultados históricos", true);
 
-    public ResultadosDialog(JFrame parent, String title, String message) {
-        super(parent, title, true);
-        setLayout(new BorderLayout());
-        setSize(400, 200);
-        setLocationRelativeTo(parent);
+        AlgorithmResultDAO dao = new AlgorithmResultDAOFile();
+        List<AlgorithmResult> results = dao.getAllResults();
 
-        JTextArea textArea = new JTextArea(message);
-        textArea.setEditable(false);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        add(new JScrollPane(textArea), BorderLayout.CENTER);
+        String[] columnNames = {"Algoritmo", "Longitud", "Tiempo (ms)"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
-        JButton closeButton = new JButton("Cerrar");
-        closeButton.addActionListener(e -> dispose());
+        for (AlgorithmResult r : results) {
+            Object[] row = {r.getAlgorithmName(), r.getPathLength(), r.getExecutionTime()};
+            model.addRow(row);
+        }
+
+        JTable table = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        JButton clearButton = new JButton("Limpiar resultados");
+        clearButton.addActionListener(e -> {
+            dao.clearResults();
+            model.setRowCount(0);
+        });
+
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(closeButton);
+        buttonPanel.add(clearButton);
+
+        setLayout(new BorderLayout());
+        add(scrollPane, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
+
+        setSize(400, 300);
+        setLocationRelativeTo(parent);
     }
 }
