@@ -15,11 +15,34 @@ public class MazeSolverDFS implements MazeSolver {
     public List<Cell> solve(Cell[][] maze, int startRow, int startCol, int endRow, int endCol) {
         int rows = maze.length;
         int cols = maze[0].length;
+
+        if (startRow < 0 || startRow >= rows || startCol < 0 || startCol >= cols ||
+                endRow < 0 || endRow >= rows || endCol < 0 || endCol >= cols) {
+            System.err.println("Error: Coordenadas de inicio o fin fuera de los límites del laberinto.");
+            return Collections.emptyList();
+        }
+
+        if (maze[startRow][startCol].getState() == CellState.WALL ||
+                maze[endRow][endCol].getState() == CellState.WALL) {
+            System.err.println("Error: La celda de inicio o fin es una pared.");
+            return Collections.emptyList();
+        }
+
+        if (startRow == endRow && startCol == endCol) {
+            List<Cell> path = new ArrayList<>();
+            path.add(maze[startRow][startCol]);
+            return path;
+        }
+
         boolean[][] visited = new boolean[rows][cols];
         Cell[][] prev = new Cell[rows][cols];
         Stack<Cell> stack = new Stack<>();
-        stack.push(maze[startRow][startCol]);
+
+        Cell startCell = maze[startRow][startCol];
+        stack.push(startCell);
         visited[startRow][startCol] = true;
+
+        boolean foundPath = false;
 
         while (!stack.isEmpty()) {
             Cell current = stack.pop();
@@ -27,6 +50,7 @@ public class MazeSolverDFS implements MazeSolver {
             int c = current.getCol();
 
             if (r == endRow && c == endCol) {
+                foundPath = true;
                 break;
             }
 
@@ -41,15 +65,18 @@ public class MazeSolverDFS implements MazeSolver {
             }
         }
 
-        // Reconstruir el camino
         List<Cell> path = new ArrayList<>();
-        Cell curr = maze[endRow][endCol];
-        while (curr != null && !(curr.getRow() == startRow && curr.getCol() == startCol)) {
-            path.add(curr);
-            curr = prev[curr.getRow()][curr.getCol()];
+        if (foundPath) {
+            Cell curr = maze[endRow][endCol];
+            while (curr != null && !(curr.getRow() == startRow && curr.getCol() == startCol)) {
+                path.add(curr);
+                curr = prev[curr.getRow()][curr.getCol()];
+            }
+            if (curr != null) {
+                path.add(curr);
+            }
+            Collections.reverse(path);
         }
-        if (curr != null) path.add(curr); 
-        Collections.reverse(path);
         return path;
     }
 
