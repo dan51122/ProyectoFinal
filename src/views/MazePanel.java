@@ -20,10 +20,10 @@ public class MazePanel extends JPanel {
     private Interaction_Mode currentMode = Interaction_Mode.NONE;
     private boolean mouseDown = false;
 
-    private Image wallTexture = new ImageIcon("assets/brick.jpg").getImage();
-    private Image mouseTexture = new ImageIcon("assets/mouse.png").getImage();
-    private Image cheeseTexture = new ImageIcon("assets/cheese.png").getImage();
-    private Image backgroundImage = new ImageIcon("assets/background.jpg").getImage();
+    private Image wallTexture = new ImageIcon("src/resources/brick.jpg").getImage();
+    private Image mouseTexture = new ImageIcon("src/resources/mouse.png").getImage();
+    private Image cheeseTexture = new ImageIcon("src/resources/cheese.png").getImage();
+    private Image backgroundImage = new ImageIcon("src/resources/background.jpg").getImage();
 
     private int currentMouseRow = -1;
     private int currentMouseCol = -1;
