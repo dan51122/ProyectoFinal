@@ -17,28 +17,28 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Timer;
 
-import dao.AlgorithmResultDAO;
-import dao.daoImpl.AlgorithmResultDAOFile;
+import controllers.MazeController;
 import models.Cell;
 import models.CellState;
-import models.AlgorithmResult;
-import solver.MazeSolver;
-import solver.solverImpl.MazeSolverBFS;
-import solver.solverImpl.MazeSolverDFS;
-import solver.solverImpl.MazeSolverRecursivo;
-import solver.solverImpl.MazeSolverRecursivoCompleto;
-import solver.solverImpl.MazeSolverRecursivoCompletoBT;
 
 public class MazeFrame extends JFrame {
 
     private MazePanel mazePanel;
     private JComboBox<String> algorithmComboBox;
+    private JButton setStartButton;
+    private JButton setEndButton;
+    private JButton toggleWallButton;
+    private JButton eraseWallButton;
+    private JButton resultadosButton;
+    private JButton graficaButton;
+    private JButton solveButton;
+    private JButton stepByStepButton;
+    private JButton clearButton;
+    private JButton stepBackButton;
+    private JButton stepForwardButton;
+    private JButton stepStopButton;
 
-    private Timer stepTimer;
-    private List<Cell> stepPath;
-    private int currentStep;
-    private boolean isStepping = false;
-    private long stepStartTime;
+    private MazeController controller; 
 
     public MazeFrame(int numRows, int numCols) {
         super("Maze Creator");
@@ -46,17 +46,21 @@ public class MazeFrame extends JFrame {
         setSize(800, 600);
         setLocationRelativeTo(null);
 
+        mazePanel = new MazePanel(numRows, numCols);
+        this.controller = new MazeController(this, mazePanel); // Se crea el controlador aquí
         initComponents(numRows, numCols);
     }
 
     private void initComponents(int numRows, int numCols) {
+        // --- Panel Superior (Botones de Interacción con el Laberinto) ---
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        JButton setStartButton = new JButton("Set Start");
-        JButton setEndButton = new JButton("Set End");
-        JButton toggleWallButton = new JButton("Toggle Wall");
-        JButton eraseWallButton = new JButton("Borrar muro");
-        JButton resultadosButton = new JButton("Ver resultados");
-        JButton graficaButton = new JButton("Ver gráfica");
+        setStartButton = new JButton("Set Start");
+        setEndButton = new JButton("Set End");
+        toggleWallButton = new JButton("Toggle Wall");
+        eraseWallButton = new JButton("Borrar muro");
+        resultadosButton = new JButton("Ver resultados");
+        graficaButton = new JButton("Ver gráfica");
+
         topPanel.add(setStartButton);
         topPanel.add(setEndButton);
         topPanel.add(toggleWallButton);
@@ -65,9 +69,10 @@ public class MazeFrame extends JFrame {
         topPanel.add(graficaButton);
         add(topPanel, BorderLayout.NORTH);
 
-        mazePanel = new MazePanel(numRows, numCols);
+        // --- Panel del Laberinto ---
         add(new JScrollPane(mazePanel), BorderLayout.CENTER);
 
+        // --- Panel Inferior (Botones de Solución y Algoritmos) ---
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         bottomPanel.add(new JLabel("Algoritmo:"));
         String[] algorithms = { "Recursivo", "Recursivo Completo", "Recursivo Completo BT", "BFS", "DFS" };
@@ -75,12 +80,13 @@ public class MazeFrame extends JFrame {
         algorithmComboBox.setSelectedItem("Recursivo");
         bottomPanel.add(algorithmComboBox);
 
-        JButton solveButton = new JButton("Resolver");
-        JButton stepByStepButton = new JButton("Paso a paso");
-        JButton clearButton = new JButton("Limpiar");
-        JButton stepBackButton = new JButton("<");
-        JButton stepForwardButton = new JButton(">");
-        JButton stepStopButton = new JButton("⏹");
+        solveButton = new JButton("Resolver");
+        stepByStepButton = new JButton("Paso a paso");
+        clearButton = new JButton("Limpiar");
+        stepBackButton = new JButton("<");
+        stepForwardButton = new JButton(">");
+        stepStopButton = new JButton("⏹");
+
         bottomPanel.add(solveButton);
         bottomPanel.add(stepByStepButton);
         bottomPanel.add(clearButton);
@@ -89,265 +95,78 @@ public class MazeFrame extends JFrame {
         bottomPanel.add(stepStopButton);
         add(bottomPanel, BorderLayout.SOUTH);
 
+        // --- Barra de Menú ---
         JMenuBar menuBar = new JMenuBar();
         JMenu archivoMenu = new JMenu("Archivo");
         JMenuItem salirItem = new JMenuItem("Salir");
-        salirItem.addActionListener(e -> System.exit(0));
+        salirItem.addActionListener(e -> System.exit(0)); // Esto puede quedarse aquí o pasarse al controlador si quieres manejar cierres más complejos.
         archivoMenu.add(salirItem);
+
         JMenu ayudaMenu = new JMenu("Ayuda");
         JMenuItem acercaDeItem = new JMenuItem("Acerca de...");
         acercaDeItem.addActionListener(e -> JOptionPane.showMessageDialog(this, "Creador de Laberintos v1.0",
-                "Acerca de", JOptionPane.INFORMATION_MESSAGE));
+                "Acerca de", JOptionPane.INFORMATION_MESSAGE)); // Esto también puede quedarse aquí
         ayudaMenu.add(acercaDeItem);
+
         menuBar.add(archivoMenu);
         menuBar.add(ayudaMenu);
         setJMenuBar(menuBar);
 
+        // --- Añadir Listeners (ahora delegan en el controlador) ---
         setStartButton.addActionListener(e -> {
-            mazePanel.setInteractionMode(MazePanel.Interaction_Mode.SET_START);
+            controller.setInteractionMode(MazePanel.Interaction_Mode.SET_START);
             setActiveButton(setStartButton, setEndButton, toggleWallButton, eraseWallButton);
-            clearCurrentPath();
         });
-
         setEndButton.addActionListener(e -> {
-            mazePanel.setInteractionMode(MazePanel.Interaction_Mode.SET_END);
+            controller.setInteractionMode(MazePanel.Interaction_Mode.SET_END);
             setActiveButton(setEndButton, setStartButton, toggleWallButton, eraseWallButton);
-            clearCurrentPath();
         });
-
         toggleWallButton.addActionListener(e -> {
-            mazePanel.setInteractionMode(MazePanel.Interaction_Mode.TOGGLE_WALL);
+            controller.setInteractionMode(MazePanel.Interaction_Mode.TOGGLE_WALL);
             setActiveButton(toggleWallButton, setStartButton, setEndButton, eraseWallButton);
-            clearCurrentPath();
         });
-
         eraseWallButton.addActionListener(e -> {
-            mazePanel.setInteractionMode(MazePanel.Interaction_Mode.BORRAR_WALL);
+            controller.setInteractionMode(MazePanel.Interaction_Mode.BORRAR_WALL);
             setActiveButton(eraseWallButton, setStartButton, setEndButton, toggleWallButton);
-            clearCurrentPath();
         });
 
-        resultadosButton.addActionListener(e -> {
-            new ResultadosDialog(this).setVisible(true);
-        });
-
-        graficaButton.addActionListener(e -> {
-            new GraficaTiemposDialog(this).setVisible(true);
-        });
-
-        solveButton.addActionListener(e -> {
-            clearCurrentPath();
-            Cell[][] mazeData = mazePanel.getMazeData();
-            int startRow = -1, startCol = -1, endRow = -1, endCol = -1;
-            for (int r = 0; r < mazeData.length; r++) {
-                for (int c = 0; c < mazeData[0].length; c++) {
-                    if (mazeData[r][c].getState() == CellState.START) {
-                        startRow = r; startCol = c;
-                    }
-                    if (mazeData[r][c].getState() == CellState.END) {
-                        endRow = r; endCol = c;
-                    }
-                }
-            }
-            if (startRow == -1 || endRow == -1) {
-                JOptionPane.showMessageDialog(this, "Debes establecer inicio y fin.");
-                return;
-            }
-            MazeSolver solver = getSelectedSolver();
-            long startTime = System.nanoTime();
-            List<Cell> path = solver.solve(mazeData, startRow, startCol, endRow, endCol);
-            long endTime = System.nanoTime();
-            long durationMs = (endTime - startTime) / 1_000_000;
-
-            if (path != null && !path.isEmpty()) {
-                mazePanel.drawPath(path);
-                AlgorithmResult result = new AlgorithmResult(solver.getName(), path.size(), durationMs);
-                JOptionPane.showMessageDialog(this, result.toString(), "Resultado", JOptionPane.INFORMATION_MESSAGE);
-                AlgorithmResultDAO dao = new AlgorithmResultDAOFile();
-                dao.saveResult(result);
-            } else {
-                AlgorithmResult result = new AlgorithmResult(solver.getName(), 0, durationMs);
-                JOptionPane.showMessageDialog(this, "No se encontró camino.\n" + result.toString(), "Resultado", JOptionPane.INFORMATION_MESSAGE);
-                AlgorithmResultDAO dao = new AlgorithmResultDAOFile();
-                dao.saveResult(result);
-            }
-        });
-
-        stepByStepButton.addActionListener(e -> {
-            if (isStepping && stepTimer != null && stepTimer.isRunning()) {
-                stepTimer.stop();
-            }
-            isStepping = false;
-
-            clearCurrentPath();
-
-            Cell[][] mazeData = mazePanel.getMazeData();
-            int startRow = -1, startCol = -1, endRow = -1, endCol = -1;
-            for (int r = 0; r < mazeData.length; r++) {
-                for (int c = 0; c < mazeData[0].length; c++) {
-                    if (mazeData[r][c].getState() == CellState.START) {
-                        startRow = r;
-                        startCol = c;
-                    }
-                    if (mazeData[r][c].getState() == CellState.END) {
-                        endRow = r;
-                        endCol = c;
-                    }
-                }
-            }
-            if (startRow == -1 || endRow == -1) {
-                JOptionPane.showMessageDialog(this, "Debes establecer inicio y fin.");
-                return;
-            }
-            MazeSolver solver = getSelectedSolver();
-            stepStartTime = System.nanoTime();
-            stepPath = solver.solve(mazeData, startRow, startCol, endRow, endCol);
-            currentStep = 0;
-
-            if (stepPath == null || stepPath.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No se encontró camino para el modo paso a paso.", "Camino no encontrado", JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-
-            isStepping = true;
-            stepTimer = new Timer(200, evt -> {
-                if (stepPath != null && currentStep < stepPath.size() && isStepping) {
-                    Cell cell = stepPath.get(currentStep);
-                    if (cell.getState() != CellState.START && cell.getState() != CellState.END) {
-                        cell.setState(CellState.PATH);
-                    }
-                    mazePanel.repaint();
-                    currentStep++;
-                } else {
-                    if (stepTimer != null) {
-                        stepTimer.stop();
-                    }
-                    isStepping = false;
-                    if (currentStep == stepPath.size()) {
-                        long stepEndTime = System.nanoTime();
-                        long durationMs = (stepEndTime - stepStartTime) / 1_000_000;
-                        AlgorithmResult result = new AlgorithmResult(
-                                getSelectedSolver().getName(),
-                                stepPath.size(),
-                                durationMs
-                        );
-                        JOptionPane.showMessageDialog(this, "Camino terminado.\n" + result.toString(), "Paso a paso", JOptionPane.INFORMATION_MESSAGE);
-                        AlgorithmResultDAO dao = new AlgorithmResultDAOFile();
-                        dao.saveResult(result);
-                        stepPath = null;
-                        currentStep = 0;
-                    }
-                }
-            });
-            stepTimer.start();
-        });
-
-        clearButton.addActionListener(e -> {
-            mazePanel.clearMaze();
-            clearCurrentPath();
-        });
-
-        algorithmComboBox.addActionListener(e -> {
-            clearCurrentPath();
-        });
-
-        stepForwardButton.addActionListener(e -> {
-            if (stepPath != null && currentStep < stepPath.size()) {
-                if (stepTimer != null && stepTimer.isRunning()) {
-                    stepTimer.stop();
-                    isStepping = false;
-                }
-                Cell cell = stepPath.get(currentStep);
-                if (cell.getState() != CellState.START && cell.getState() != CellState.END) {
-                    cell.setState(CellState.PATH);
-                }
-                mazePanel.repaint();
-                currentStep++;
-                if (currentStep == stepPath.size()) {
-                    long stepEndTime = System.nanoTime();
-                    long durationMs = (stepEndTime - stepStartTime) / 1_000_000;
-                    AlgorithmResult result = new AlgorithmResult(
-                            getSelectedSolver().getName(),
-                            stepPath.size(),
-                            durationMs
-                    );
-                    JOptionPane.showMessageDialog(this, "Camino terminado.\n" + result.toString(), "Paso a paso", JOptionPane.INFORMATION_MESSAGE);
-                    AlgorithmResultDAO dao = new AlgorithmResultDAOFile();
-                    dao.saveResult(result);
-                    stepPath = null;
-                    currentStep = 0;
-                }
-            } else if (stepPath != null && currentStep == stepPath.size()){
-                JOptionPane.showMessageDialog(this, "El camino ya ha sido completado.", "Paso a paso", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-
-        stepBackButton.addActionListener(e -> {
-            if (stepTimer != null && stepTimer.isRunning()) {
-                stepTimer.stop();
-                isStepping = false;
-            }
-            if (stepPath != null && currentStep > 0) {
-                currentStep--;
-                Cell cell = stepPath.get(currentStep);
-                if (cell.getState() == CellState.PATH) {
-                    cell.setState(CellState.EMPTY);
-                }
-                mazePanel.repaint();
-            }
-        });
-
-        stepStopButton.addActionListener(e -> {
-            if (stepTimer != null && stepTimer.isRunning()) {
-                stepTimer.stop();
-            }
-            isStepping = false;
-        });
+        resultadosButton.addActionListener(e -> controller.showResults());
+        graficaButton.addActionListener(e -> controller.showGraph());
+        solveButton.addActionListener(e -> controller.solveMaze());
+        stepByStepButton.addActionListener(e -> controller.startStepByStep());
+        clearButton.addActionListener(e -> controller.clearMaze());
+        stepForwardButton.addActionListener(e -> controller.stepForward());
+        stepBackButton.addActionListener(e -> controller.stepBack());
+        stepStopButton.addActionListener(e -> controller.stopStepping());
+        algorithmComboBox.addActionListener(e -> controller.algorithmSelected((String) algorithmComboBox.getSelectedItem()));
     }
 
-    private void setActiveButton(JButton active, JButton... others) {
+    public String getSelectedAlgorithm() {
+        return (String) algorithmComboBox.getSelectedItem();
+    }
+
+    public MazePanel getMazePanel() {
+        return mazePanel;
+    }
+
+    public void setActiveButton(JButton active, JButton... others) {
         active.setBackground(new Color(135, 206, 250));
         for (JButton btn : others) {
             btn.setBackground(null);
         }
     }
 
-    private void clearCurrentPath() {
-        if (stepTimer != null && stepTimer.isRunning()) {
-            stepTimer.stop();
-        }
-        isStepping = false;
-        stepPath = null;
-        currentStep = 0;
-
-        Cell[][] mazeData = mazePanel.getMazeData();
-        for (int r = 0; r < mazeData.length; r++) {
-            for (int c = 0; c < mazeData[0].length; c++) {
-                Cell cell = mazeData[r][c];
-                // Solo restablecer si no es START, END o WALL
-                if (cell.getState() != CellState.START && cell.getState() != CellState.END && cell.getState() != CellState.WALL) {
-                    cell.setState(CellState.EMPTY);
-                }
-            }
-        }
-        mazePanel.repaint();
+    public void showMessage(String message, String title, int messageType) {
+        JOptionPane.showMessageDialog(this, message, title, messageType);
     }
 
-    private MazeSolver getSelectedSolver() {
-        String selected = (String) algorithmComboBox.getSelectedItem();
-        switch (selected) {
-            case "Recursivo":
-                return new MazeSolverRecursivo();
-            case "Recursivo Completo":
-                return new MazeSolverRecursivoCompleto();
-            case "Recursivo Completo BT":
-                return new MazeSolverRecursivoCompletoBT();
-            case "BFS":
-                return new MazeSolverBFS();
-            case "DFS":
-                return new MazeSolverDFS();
-            default:
-                return new MazeSolverRecursivo();
-        }
+    // Método para dibujar el camino, llamado desde el controlador
+    public void drawPathOnPanel(List<Cell> path) {
+        mazePanel.drawPath(path);
+    }
+
+    // Método para repintar el panel del laberinto
+    public void repaintMazePanel() {
+        mazePanel.repaint();
     }
 }
