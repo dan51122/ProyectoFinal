@@ -19,7 +19,7 @@
 
 ## 📌 1. Carátula
 
-![alt text](image.png)
+![alt text](src/resources/image.png)
 
 *Universidad Politecnica  Saleciana*
 
@@ -116,7 +116,7 @@ interacción entre la vista y el modelo.
 ```
 ### 3.4. Diagrama UML
 
-![alt text](image-1.png)
+![alt text](src/resources/image-1.png)
 El *Diagrama UML* adjunto ilustra la *arquitectura Modelo-Vista-Controlador (MVC)* implementada en el proyecto, junto con el patrón *DAO (Data Access Object)*. Se puede observar claramente cómo las clases se relacionan:
 
 * **MazeApp** actúa como el punto de entrada, inicializando la aplicación.
@@ -130,11 +130,14 @@ Esta estructura garantiza una clara separación de responsabilidades y facilita 
 
 ### 3.5. Capturas de Interfaz
 
-*[Aquí debes agregar al menos 2 capturas en diferentes laberintos, mostrando el uso de un algoritmo. Ejemplo:]*
+![alt text](src/resources/interfaz3.png)
 
 * *Laberinto con solución BFS:*
 
     Esta captura muestra un laberinto con un punto de inicio (verde), un punto final (rojo) y varios muros (negro). Se ha aplicado el algoritmo *BFS*, y el camino más corto encontrado está resaltado en azul.
+
+
+![alt text](src/resources/interfaz4.png)
 
 * *Laberinto con solución DFS (modo paso a paso):*
 

@@ -16,3 +16,7 @@ BFS (Breadth-First Search),7,0
 Recursivo,8,0
 Recursivo (4 direcciones),26,0
 Recursivo (4 direcciones + Backtracking),26,0
+Recursivo (4 direcciones + Backtracking),0,1184
+Recursivo (4 direcciones + Backtracking),18,3864
+BFS (Breadth-First Search),11,2446
+DFS (Depth-First Search),13,2856
