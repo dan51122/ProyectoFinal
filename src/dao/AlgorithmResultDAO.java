@@ -1,6 +1,10 @@
-// Interfaces de acceso a datos
 package dao;
 
+import models.AlgorithmResult;
+import java.util.List;
+
 public interface AlgorithmResultDAO {
-    // Métodos para guardar y cargar resultados
+    void saveResult(AlgorithmResult result);
+    List<AlgorithmResult> getAllResults();
+    void clearResults();
 }
