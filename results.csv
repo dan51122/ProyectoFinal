@@ -1,5 +1,9 @@
-Recursivo,0,921
+Recursivo,0,888
 Recursivo,8,1818
 Recursivo,7,0
 Recursivo (4 direcciones),15,0
 Recursivo (4 direcciones + Backtracking),15,0
+Recursivo,24,5109
+Recursivo (4 direcciones + Backtracking),208,0
+DFS (Depth-First Search),134,0
+BFS (Breadth-First Search),38,0
